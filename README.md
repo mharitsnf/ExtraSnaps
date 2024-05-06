@@ -14,8 +14,8 @@ https://github.com/mharitsnf/ExtraSnaps/assets/22760908/5541ceac-db8f-43ee-b863-
 # How to Use
 ## Moving Objects
 - Select a `Node3D` object.
-- While selecting `CTRL` / `CMD` + `W`, move your cursor around to snap the selected object onto other `PhysicsBody3D` or `CSGShape3D` objects (any objects with collisions basically).
-- Release `CTRL` / `CMD` + `W` to confirm your new transform.
+- While pressing `CTRL` / `CMD` + `W`, move your cursor around to snap the selected object onto other `PhysicsBody3D` or `CSGShape3D` objects (any objects with collisions, basically).
+- Release `CTRL` / `CMD` + `W` to confirm.
 
 ## Snapping Modes
 Currently, the plugin supports two snapping modes: *Snap to Surface* and *Snap Along Normals*.
