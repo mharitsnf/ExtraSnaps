@@ -7,6 +7,15 @@ https://github.com/mharitsnf/ExtraSnaps/assets/22760908/5541ceac-db8f-43ee-b863-
 
 
 # Installation
+There are two approaches to install the plugin as provided below. Whichever method you choose, if the plugin does not appear / work after the installation, try reloading the current project.
+
+## Asset Library
+The plugin is available in the asset library for 4.2 projects.
+1. Search for "Extra Snaps" in the asset library and download the plugin.
+2. Enable the project from the project settings.
+
+## Manual installation
+Use the manual installation for 4.1 or 4.0 projects: 
 1. Download the project as ZIP.
 2. Move the `extra_snaps` folder inside the `res://addons` folder into your `res://addons` folder in your project.
 3. Enable the plugin from the project settings.
