@@ -18,5 +18,8 @@ https://github.com/mharitsnf/ExtraSnaps/assets/22760908/5541ceac-db8f-43ee-b863-
 - Release `CTRL` / `CMD` + `W` to confirm.
 
 ## Snapping Modes
+
+![Screenshot 2024-05-06 142219](https://github.com/mharitsnf/ExtraSnaps/assets/22760908/aadf828b-54c4-4c90-a8b7-faac2686848e)
+
 Currently, the plugin supports two snapping modes: *Snap to Surface* and *Snap Along Normals*.
 *Snap to surface* allows the selected object to snap to a specific surface, while *Snap Along Normals* also aligns the selected object along the surface normal.
