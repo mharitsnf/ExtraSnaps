@@ -2,6 +2,10 @@
 
 Godot 4.X plugin that adds extra snapping functionalities for Node3D objects.
 
+
+https://github.com/mharitsnf/ExtraSnaps/assets/22760908/5541ceac-db8f-43ee-b863-8a9438ad166b
+
+
 # Installation
 1. Download the project as ZIP.
 2. Move the `extra_snaps` folder inside the `res://addons` folder into your `res://addons` folder in your project.
