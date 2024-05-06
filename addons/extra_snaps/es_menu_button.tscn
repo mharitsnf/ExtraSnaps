@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://daplr17oh5kk5"]
+
+[ext_resource type="Script" path="res://addons/extra_snaps/es_menu_button.gd" id="1_onoxo"]
+
+[node name="ESMenuButton" type="MenuButton"]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "ExtraSnaps"
+script = ExtResource("1_onoxo")
