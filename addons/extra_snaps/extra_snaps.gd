@@ -108,15 +108,15 @@ func _move_selection(viewport_camera: Camera3D, event: InputEventMouseMotion) ->
 			if result.has("position"):
 				selected.position = result.position
 			if result.has("normal"):
-				selected.basis = get_basis_from_normal(selected.basis, result.normal)
+				selected.quaternion = get_quaternion_from_normal(selected.basis, result.normal)
 
 	return AFTER_GUI_INPUT_STOP
 
-func get_basis_from_normal(old_basis: Basis, new_normal: Vector3) -> Basis:
+func get_quaternion_from_normal(old_basis: Basis, new_normal: Vector3) -> Quaternion:
 	new_normal = new_normal.normalized()
 
 	var quat : Quaternion = Quaternion(old_basis.y, new_normal).normalized()
 	var new_right : Vector3 = quat * old_basis.x
 	var new_fwd : Vector3 = quat * old_basis.z
 
-	return Basis(new_right, new_normal, new_fwd).orthonormalized()
+	return Basis(new_right, new_normal, new_fwd).get_rotation_quaternion()
