@@ -59,8 +59,8 @@ func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent) -> int:
 	if Input.is_action_just_released("extra_snaps_move") and has_moved:
 		if selected is CSGShape3D:
 			selected.use_collision = csg_use_collision
-		undoredo_action.add_do_property(selected, "position", Vector3(selected.position))
-		undoredo_action.add_do_property(selected, "basis", Basis(selected.basis))
+		undoredo_action.add_do_property(selected, "global_position", Vector3(selected.global_position))
+		undoredo_action.add_do_property(selected, "global_basis", Basis(selected.global_basis))
 		undoredo_action.commit_action()
 		has_moved = false
 
@@ -83,8 +83,8 @@ func _move_selection(viewport_camera: Camera3D, event: InputEventMouseMotion) ->
 		if selected is CSGShape3D:
 			csg_use_collision = selected.use_collision
 			selected.use_collision = false
-		undoredo_action.add_undo_property(selected, "position", Vector3(selected.position))
-		undoredo_action.add_undo_property(selected, "basis", Basis(selected.basis))
+		undoredo_action.add_undo_property(selected, "global_position", Vector3(selected.global_position))
+		undoredo_action.add_undo_property(selected, "global_basis", Basis(selected.global_basis))
 		has_moved = true
 	
 	var from: Vector3 = viewport_camera.project_ray_origin(event.position)
@@ -102,13 +102,14 @@ func _move_selection(viewport_camera: Camera3D, event: InputEventMouseMotion) ->
 	match current_snap_type:
 		SnapType.SNAP_TO_SURFACE:
 			if result.has("position"):
-				selected.position = result.position
+				selected.global_position = result.position
 			
 		SnapType.SNAP_ALONG_NORMAL:
 			if result.has("position"):
-				selected.position = result.position
+				selected.global_position = result.position
 			if result.has("normal"):
-				selected.quaternion = get_quaternion_from_normal(selected.basis, result.normal)
+				var g_quat: Quaternion = get_quaternion_from_normal(selected.global_basis, result.normal)
+				selected.global_basis = Basis(g_quat)
 
 	return AFTER_GUI_INPUT_STOP
 
