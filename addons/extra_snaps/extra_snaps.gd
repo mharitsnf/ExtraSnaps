@@ -1,6 +1,10 @@
 @tool
 extends EditorPlugin
 
+var new_config = ConfigFile.new()
+const SETTINGS_FILE_PATH = "user://extra_snaps.cfg"
+var has_config = false
+
 var undoredo_action: EditorUndoRedoManager = get_undo_redo()
 
 var tool_button: ESMenuButton
@@ -12,13 +16,31 @@ var snap_type_labels: Dictionary = {
 	SnapType.SNAP_TO_SURFACE: "Snap to Surface",
 	SnapType.SNAP_ALONG_NORMAL: "Snap Along Normal",
 }
-
 var selected: Node3D = null
 var has_moved: bool = false
-
 var move_pressed: bool = false
 
+# https://github.com/godotengine/godot-proposals/issues/2411
+const INT32_MAX = 4294967295
+# All collisions are enabled by default
+var collision_mask: int = INT32_MAX
+var DialogConfigureMaskScene = preload("res://addons/extra_snaps/dialog_configure_mask.tscn")
+var dialog_configure_mask: Window
+const ConfigureDialogToolButtonId = 2
+
 func _enter_tree() -> void:
+	# Initialize Configuration File
+	var err = new_config.load(SETTINGS_FILE_PATH)
+	if err != OK:
+		if err == ERR_FILE_NOT_FOUND:
+			err = new_config.save(SETTINGS_FILE_PATH)
+		if err != OK:
+			print("ExtraSnaps: loading config file failed: " + str(err))
+	if err == OK:
+		has_config = true
+	if has_config:
+		collision_mask = new_config.get_value("collision_mask", "collision_mask", collision_mask)
+
 	# Setup tool button
 	tool_button = preload("res://addons/extra_snaps/es_menu_button.tscn").instantiate()
 	add_control_to_container(CONTAINER_SPATIAL_EDITOR_MENU, tool_button)
@@ -27,6 +49,8 @@ func _enter_tree() -> void:
 	pm = tool_button.get_popup()
 	pm.add_radio_check_item(snap_type_labels[SnapType.SNAP_TO_SURFACE], SnapType.SNAP_TO_SURFACE)
 	pm.add_radio_check_item(snap_type_labels[SnapType.SNAP_ALONG_NORMAL], SnapType.SNAP_ALONG_NORMAL)
+	pm.add_separator()
+	pm.add_item("Configure Mask", ConfigureDialogToolButtonId)
 	pm.set_item_checked(SnapType.SNAP_TO_SURFACE, true)
 	pm.id_pressed.connect(_on_popup_id_pressed)
 
@@ -41,6 +65,7 @@ func _enter_tree() -> void:
 func _exit_tree() -> void:
 	remove_control_from_container(CONTAINER_SPATIAL_EDITOR_MENU, tool_button)
 	tool_button.queue_free()
+	dialog_configure_mask.queue_free()
 
 	InputMap.erase_action("extra_snaps_move")
 
@@ -78,7 +103,40 @@ func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent) -> int:
 
 	return AFTER_GUI_INPUT_PASS
 
+func _close_config() -> void:
+	dialog_configure_mask.queue_free()
+
+func save_config():
+	if has_config:
+		new_config.set_value("collision_mask", "collision_mask", collision_mask)
+		new_config.save(SETTINGS_FILE_PATH)
+
+func on_mask_config_confirm(mask: int) -> void:
+	dialog_configure_mask.queue_free()
+	if mask == collision_mask:
+		return
+	var old_mask = collision_mask
+	collision_mask = mask
+	undoredo_action.create_action("ExtraSnaps: Collision Mask Changed")
+	undoredo_action.add_do_property(self, "collision_mask", mask)
+	undoredo_action.add_undo_property(self, "collision_mask", old_mask)
+	undoredo_action.add_do_method(self, "save_config")
+	undoredo_action.add_undo_method(self, "save_config")
+	undoredo_action.commit_action()
+	save_config()
+
 func _on_popup_id_pressed(id: int) -> void:
+	if id == ConfigureDialogToolButtonId:
+		dialog_configure_mask = DialogConfigureMaskScene.instantiate()
+		dialog_configure_mask.connect("on_confirm", on_mask_config_confirm)
+		dialog_configure_mask.set("mask", collision_mask)
+		dialog_configure_mask.close_requested.connect(_close_config)
+		dialog_configure_mask.hide()
+		var editor_interface = get_editor_interface()
+		var base_control = editor_interface.get_base_control()
+		base_control.add_child(dialog_configure_mask)
+		dialog_configure_mask.popup_centered()
+
 	if SnapType.values().has(id):
 		current_snap_type = id
 		for i in SnapType.values():
@@ -133,6 +191,7 @@ func _move_selection(viewport_camera: Camera3D, event: InputEventMouseMotion) ->
 
 	ray_query.from = from
 	ray_query.to = to
+	ray_query.collision_mask = collision_mask
 	var result: Dictionary = space.intersect_ray(ray_query)
 	
 	match current_snap_type:
