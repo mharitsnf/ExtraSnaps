@@ -6,6 +6,7 @@
 [node name="DialogConfigureMask" type="Window"]
 title = "ExtraSnaps - Configure Mask"
 size = Vector2i(672, 168)
+exclusive = true
 min_size = Vector2i(672, 168)
 max_size = Vector2i(672, 168)
 keep_title_visible = true
