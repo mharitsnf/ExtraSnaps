@@ -1,0 +1,205 @@
+[gd_scene load_steps=3 format=3 uid="uid://xp4t83bqemg0"]
+
+[ext_resource type="PackedScene" uid="uid://cjqwkh8go5htu" path="res://addons/extra_snaps/layer_toggle.tscn" id="1_n2d4b"]
+[ext_resource type="Script" path="res://addons/extra_snaps/dialog_configure_mask.gd" id="1_wyu78"]
+
+[node name="DialogConfigureMask" type="Window"]
+title = "ExtraSnaps - Configure Mask"
+size = Vector2i(672, 168)
+exclusive = true
+min_size = Vector2i(672, 168)
+max_size = Vector2i(672, 168)
+keep_title_visible = true
+script = ExtResource("1_wyu78")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="LayerButtons" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/LayerButtons"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer"]
+layout_mode = 2
+
+[node name="LayerToggle" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer/HBoxContainer" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+
+[node name="LayerToggle2" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer/HBoxContainer" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "2"
+
+[node name="LayerToggle3" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer/HBoxContainer" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "3"
+
+[node name="LayerToggle4" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer/HBoxContainer" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "4"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer"]
+layout_mode = 2
+
+[node name="LayerToggle5" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer/HBoxContainer2" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "5"
+
+[node name="LayerToggle6" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer/HBoxContainer2" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "6"
+
+[node name="LayerToggle7" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer/HBoxContainer2" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "7"
+
+[node name="LayerToggle8" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer/HBoxContainer2" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "8"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/LayerButtons"]
+layout_mode = 2
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer2"]
+layout_mode = 2
+
+[node name="LayerToggle9" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer2/HBoxContainer3" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "9"
+
+[node name="LayerToggle10" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer2/HBoxContainer3" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "10"
+
+[node name="LayerToggle11" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer2/HBoxContainer3" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "11"
+
+[node name="LayerToggle12" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer2/HBoxContainer3" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "12"
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer2"]
+layout_mode = 2
+
+[node name="LayerToggle13" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer2/HBoxContainer4" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "13"
+
+[node name="LayerToggle14" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer2/HBoxContainer4" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "14"
+
+[node name="LayerToggle15" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer2/HBoxContainer4" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "15"
+
+[node name="LayerToggle16" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer2/HBoxContainer4" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "16"
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/VBoxContainer/LayerButtons"]
+layout_mode = 2
+
+[node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer3"]
+layout_mode = 2
+
+[node name="LayerToggle17" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer3/HBoxContainer5" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "17"
+
+[node name="LayerToggle18" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer3/HBoxContainer5" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "18"
+
+[node name="LayerToggle19" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer3/HBoxContainer5" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "19"
+
+[node name="LayerToggle20" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer3/HBoxContainer5" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "20"
+
+[node name="HBoxContainer6" type="HBoxContainer" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer3"]
+layout_mode = 2
+
+[node name="LayerToggle21" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer3/HBoxContainer6" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "21"
+
+[node name="LayerToggle22" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer3/HBoxContainer6" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "22"
+
+[node name="LayerToggle23" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer3/HBoxContainer6" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "23"
+
+[node name="LayerToggle24" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer3/HBoxContainer6" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "24"
+
+[node name="VBoxContainer4" type="VBoxContainer" parent="MarginContainer/VBoxContainer/LayerButtons"]
+layout_mode = 2
+
+[node name="HBoxContainer7" type="HBoxContainer" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer4"]
+layout_mode = 2
+
+[node name="LayerToggle25" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer4/HBoxContainer7" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "25"
+
+[node name="LayerToggle26" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer4/HBoxContainer7" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "26"
+
+[node name="LayerToggle27" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer4/HBoxContainer7" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "27"
+
+[node name="LayerToggle28" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer4/HBoxContainer7" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "28"
+
+[node name="HBoxContainer8" type="HBoxContainer" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer4"]
+layout_mode = 2
+
+[node name="LayerToggle29" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer4/HBoxContainer8" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "29"
+
+[node name="LayerToggle30" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer4/HBoxContainer8" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "30"
+
+[node name="LayerToggle31" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer4/HBoxContainer8" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "31"
+
+[node name="LayerToggle32" parent="MarginContainer/VBoxContainer/LayerButtons/VBoxContainer4/HBoxContainer8" instance=ExtResource("1_n2d4b")]
+layout_mode = 2
+text = "32"
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 16
+
+[node name="ActionButtons" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer"]
+layout_direction = 3
+layout_mode = 2
+
+[node name="Confirm" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer/ActionButtons"]
+layout_mode = 2
+text = "Confirm"
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/MarginContainer/ActionButtons/Confirm" to="." method="_on_confirm_pressed"]

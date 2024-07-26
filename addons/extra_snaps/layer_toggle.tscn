@@ -1,0 +1,30 @@
+[gd_scene load_steps=6 format=3 uid="uid://cjqwkh8go5htu"]
+
+[ext_resource type="Script" path="res://addons/extra_snaps/layer_toggle.gd" id="1_c2llh"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mupm7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ie7j3"]
+bg_color = Color(0.242, 0.3377, 0.44, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_guy7l"]
+bg_color = Color(0.309804, 0.490196, 0.65098, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b6i2d"]
+bg_color = Color(0.180392, 0.25098, 0.32549, 1)
+
+[node name="LayerToggle" type="Button"]
+custom_minimum_size = Vector2(36, 36)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = SubResource("StyleBoxEmpty_mupm7")
+theme_override_styles/hover = SubResource("StyleBoxFlat_ie7j3")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_guy7l")
+theme_override_styles/normal = SubResource("StyleBoxFlat_b6i2d")
+toggle_mode = true
+text = "1"
+script = ExtResource("1_c2llh")
+
+[connection signal="toggled" from="." to="." method="_on_toggled"]
