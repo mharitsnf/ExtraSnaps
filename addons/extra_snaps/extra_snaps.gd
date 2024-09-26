@@ -164,9 +164,14 @@ func _move_selection(viewport_camera: Camera3D, event: InputEventMouseMotion) ->
 	return AFTER_GUI_INPUT_STOP
 
 func _mesh_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> void:
+	# Preprocess
+	var viewport: SubViewport = viewport_camera.get_viewport()
+	var event_position_scale: Vector2 = Vector2.ONE / viewport.get_screen_transform().get_scale()
+	var screen_position: Vector2 = event.position * event_position_scale
+
 	# Mesh snapping
-	var from: Vector3 = viewport_camera.project_ray_origin(event.position)
-	var to: Vector3 = viewport_camera.project_ray_normal(event.position)
+	var from: Vector3 = viewport_camera.project_ray_origin(screen_position)
+	var to: Vector3 = viewport_camera.project_ray_normal(screen_position)
 
 	var min_t: float = common.FLOAT64_MAX
 	var min_p: Vector3 = Vector3.INF
@@ -208,9 +213,14 @@ func _mesh_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> 
 			selected.global_basis = Basis(g_quat)
 
 func _collision_objects_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> void:
+	# Preprocess
+	var viewport: SubViewport = viewport_camera.get_viewport()
+	var event_position_scale: Vector2 = Vector2.ONE / viewport.get_screen_transform().get_scale()
+	var screen_position: Vector2 = event.position * event_position_scale
+
 	# Physics snapping
-	var from: Vector3 = viewport_camera.project_ray_origin(event.position)
-	var to: Vector3 = from + viewport_camera.project_ray_normal(event.position) * RAY_LENGTH
+	var from: Vector3 = viewport_camera.project_ray_origin(screen_position)
+	var to: Vector3 = from + viewport_camera.project_ray_normal(screen_position) * RAY_LENGTH
 	var space: PhysicsDirectSpaceState3D = viewport_camera.get_world_3d().direct_space_state
 	var ray_query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
 
