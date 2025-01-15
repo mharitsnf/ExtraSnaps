@@ -31,11 +31,16 @@ func _enter_tree() -> void:
 			print("ExtraSnaps: loading config file failed: " + str(err))
 	if err == OK:
 		has_config = true
+	
 	if has_config:
 		collision_mask = new_config.get_value("collision_mask", "collision_mask", collision_mask)
+		current_surface_type = new_config.get_value("surface_type", "surface_type", current_surface_type)
+		current_snap_type = new_config.get_value("snap_type", "snap_type", current_snap_type)
 
 	# Setup tool button
 	tool_button = common.ES_MENU_BUTTON_PSCN.instantiate()
+	if has_config:
+		tool_button.set_initial_values(current_surface_type, current_snap_type)
 	tool_button.collision_mask = collision_mask
 	tool_button.new_surface_type_selected.connect(_on_new_surface_type_selected)
 	tool_button.new_snap_type_selected.connect(_on_new_snap_type_selected)
@@ -112,9 +117,11 @@ func _on_configure_mask_window_instantiated(window: Window) -> void:
 
 func _on_new_surface_type_selected(id: common.SurfaceTypes) -> void:
 	current_surface_type = id
+	save_config()
 
 func _on_new_snap_type_selected(id: common.SnapTypes) -> void:
 	current_snap_type = id
+	save_config()
 
 func _on_collision_mask_changed(mask: int) -> void:
 	if mask == collision_mask:
@@ -132,6 +139,8 @@ func _on_collision_mask_changed(mask: int) -> void:
 func save_config():
 	if has_config:
 		new_config.set_value("collision_mask", "collision_mask", collision_mask)
+		new_config.set_value("surface_type", "surface_type", current_surface_type)
+		new_config.set_value("snap_type", "snap_type", current_snap_type)
 		new_config.save(common.SETTINGS_FILE_PATH)
 
 # region Movement handling

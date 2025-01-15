@@ -15,13 +15,16 @@ signal new_snap_type_selected(id: common.SnapTypes)
 signal new_surface_type_selected(id: common.SurfaceTypes)
 signal collision_mask_changed(mask: int)
 
+var init_surface_type: int = common.SurfaceTypes.COLLISION_OBJECTS
+var init_snap_type: int = common.SnapTypes.SNAP_TO_SURFACE
+
 func _enter_tree() -> void:
 	# Setup surface type submenu
 	surface_type_pm = PopupMenu.new()
 	surface_type_pm.name = "SurfaceTypePM"
 	surface_type_pm.add_radio_check_item("Snap with Collision Objects", common.SurfaceTypes.COLLISION_OBJECTS)
 	surface_type_pm.add_radio_check_item("Snap with Meshes", common.SurfaceTypes.MESHES)
-	surface_type_pm.set_item_checked(common.SurfaceTypes.COLLISION_OBJECTS, true)
+	surface_type_pm.set_item_checked(init_surface_type, true)
 	surface_type_pm.id_pressed.connect(_on_surface_type_pm_id_pressed)
 
 	# Setup snap type submenu
@@ -29,7 +32,7 @@ func _enter_tree() -> void:
 	snap_type_pm.name = "SnapTypePM"
 	snap_type_pm.add_radio_check_item("Snap to Surface", common.SnapTypes.SNAP_TO_SURFACE)
 	snap_type_pm.add_radio_check_item("Snap Along Normals", common.SnapTypes.SNAP_ALONG_NORMAL)
-	snap_type_pm.set_item_checked(common.SnapTypes.SNAP_TO_SURFACE, true)
+	snap_type_pm.set_item_checked(init_snap_type, true)
 	snap_type_pm.id_pressed.connect(_on_snap_type_pm_id_pressed)
 
 	# Setup main popup
@@ -44,6 +47,10 @@ func _enter_tree() -> void:
 func _exit_tree() -> void:
 	if dialog_configure_mask:
 		dialog_configure_mask.queue_free()
+
+func set_initial_values(surface_type: int, snap_type: int) -> void:
+	init_surface_type = surface_type
+	init_snap_type = snap_type
 
 func _on_surface_type_pm_id_pressed(id: int) -> void:
 	new_surface_type_selected.emit(id)
