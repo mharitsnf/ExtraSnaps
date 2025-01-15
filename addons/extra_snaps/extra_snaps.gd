@@ -227,7 +227,6 @@ func _mesh_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> 
 					var v0v1: Vector3 = v1 - v0
 					var v0v2: Vector3 = v2 - v0
 					min_n = v0v2.cross(v0v1)
-		print("Time elapsed: ", Time.get_ticks_usec() - time1)
 
 	if min_t >= common.FLOAT64_MAX: return
 
