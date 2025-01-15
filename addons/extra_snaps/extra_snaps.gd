@@ -57,22 +57,24 @@ func _exit_tree() -> void:
 
 	InputMap.erase_action("extra_snaps_move")
 
-var selected_children: Array[Node] = []
-var visual_instances_data: Array[Dictionary] = []
+var selected_nodes: Array[Node] = []
+var object_tris_cache: Array[Dictionary] = []
 func _handles(object: Object) -> bool:
 	if object is Node3D:
+		# Set the newly selected object as selected
 		selected = object
-		visual_instances_data = []
-		collect_global_tris(object)
 
+		# Add selected nodes to be excluded later
 		var out: Array[Node] = []
-		get_all_children(out, object, null, [CollisionObject3D, CSGShape3D])
-		selected_children = out
+		get_all_children(out, object, null, [CollisionObject3D, CSGShape3D, MeshInstance3D])
+		selected_nodes = out
+
+		selected_nodes.append(selected)
+		
 		return true
 
 	selected = null
-	selected_children = []
-	visual_instances_data = []
+	selected_nodes = []
 	return false
 
 var csg_use_collisions: Array[Dictionary] = []
@@ -88,6 +90,9 @@ func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent) -> int:
 
 		undoredo_action.add_do_property(selected, "global_transform", Transform3D(selected.global_transform))
 		undoredo_action.commit_action()
+
+		object_tris_cache = []
+
 		has_moved = false
 
 	# During movement
@@ -146,7 +151,7 @@ func _move_selection(viewport_camera: Camera3D, event: InputEventMouseMotion) ->
 			selected.use_collision = false
 
 		# Also do the same for the children of the selected node.
-		for child: Node in selected_children:
+		for child: Node in selected_nodes:
 			if child is CSGShape3D:
 				csg_use_collisions.append({
 					"node": child,
@@ -164,12 +169,19 @@ func _move_selection(viewport_camera: Camera3D, event: InputEventMouseMotion) ->
 	return AFTER_GUI_INPUT_STOP
 
 func _mesh_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> void:
-	# Preprocess
+	# Preprocess / setup
 	var viewport: SubViewport = viewport_camera.get_viewport()
+	
+	var edited_scene_root: Node = EditorInterface.get_edited_scene_root()
+	if !(edited_scene_root is Node3D):
+		push_error("The scene root must be a Node3D node.")
+		return
+	var scenario: RID = edited_scene_root.get_world_3d().scenario
+	
 	var event_position_scale: Vector2 = Vector2.ONE / viewport.get_screen_transform().get_scale()
 	var screen_position: Vector2 = event.position * event_position_scale
 
-	# Mesh snapping
+	# Camera and result variable setup
 	var from: Vector3 = viewport_camera.project_ray_origin(screen_position)
 	var to: Vector3 = viewport_camera.project_ray_normal(screen_position)
 
@@ -177,16 +189,30 @@ func _mesh_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> 
 	var min_p: Vector3 = Vector3.INF
 	var min_n: Vector3
 
-	var data_to_process: Array[Dictionary] = []
+	# Get intersecting meshes, convert them from IDs to nodes
+	var object_ids: PackedInt64Array = RenderingServer.instances_cull_ray(from, to * common.SCENARIO_RAY_DISTANCE, scenario)
+	var intersected_nodes: Array = Array(object_ids).map(func (id: int) -> Object: return instance_from_id(id))
 
-	# Check if aabb of visual instance intersects
-	for data: Dictionary in visual_instances_data:
-		var global_aabb: AABB = data['aabb']
-		var res: Variant = global_aabb.intersects_ray(from, to)
-		if res is Vector3:
-			data_to_process.append(data)
+	# Loop through the intersecting meshes, add them to a global variable (object_tris_cache) if they're not in it already
+	for node: Object in intersected_nodes:
+		# Exclude the node if it's a child of the selected object
+		if selected_nodes.has(node): continue
+		
+		# Do not process the mesh instance again if it has already been processed
+		var node_data: Array[Dictionary] = object_tris_cache.filter(func (data: Dictionary) -> bool: return data.node == node)
+		if !node_data.is_empty(): continue
 
-	for data: Dictionary in data_to_process:
+		# Otherwise, create the cache
+		# Returned format: { node, aabb, global tris }
+		if node is MeshInstance3D: object_tris_cache.append(get_mesh_instance_data(node))
+		elif node is CSGShape3D: object_tris_cache.append(get_csg_data(node))
+
+	# Get the intersecting meshes cache
+	var intersected_nodes_data = object_tris_cache.filter(func (data: Dictionary) -> bool: return intersected_nodes.has(data.node))
+
+	# Find the closest point
+	for data: Dictionary in intersected_nodes_data:
+		var time1: float = Time.get_ticks_usec()
 		var tris: PackedVector3Array = data['tris']
 		for i: int in range(0, tris.size(), 3):
 			var v0: Vector3 = tris[i + 0]
@@ -194,13 +220,14 @@ func _mesh_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> 
 			var v2: Vector3 = tris[i + 2]
 			var res: Variant = Geometry3D.ray_intersects_triangle(from, to, v2, v1, v0)
 			if res is Vector3:
-				var len: float = from.distance_to(res)
+				var len: float = from.distance_squared_to(res)
 				if len < min_t:
 					min_t = len
 					min_p = res
 					var v0v1: Vector3 = v1 - v0
 					var v0v2: Vector3 = v2 - v0
 					min_n = v0v2.cross(v0v1)
+		print("Time elapsed: ", Time.get_ticks_usec() - time1)
 
 	if min_t >= common.FLOAT64_MAX: return
 
@@ -233,7 +260,7 @@ func _collision_objects_snapping(viewport_camera: Camera3D, event: InputEventMou
 		exclude_list.append(selected.get_rid())
 	
 	# Exclude CollisionObject children of the selected node
-	for child: Node in selected_children:
+	for child: Node in selected_nodes:
 		if child is CollisionObject3D: 
 			exclude_list.append((child as CollisionObject3D).get_rid())
 	
@@ -258,40 +285,35 @@ func _collision_objects_snapping(viewport_camera: Camera3D, event: InputEventMou
 
 # region Common functions
 
-## Get global triangle of all nodes in the scene, except the [exclude] node and its children.
-func collect_global_tris(exclude: Node) -> void:
-	var nodes: Array[Node] = []
-	get_all_children(nodes, EditorInterface.get_edited_scene_root(), exclude, [MeshInstance3D, CSGShape3D])
-	for node: Node in nodes:
-		if node is MeshInstance3D:
-			var mesh: Mesh = node.mesh
-			if !mesh: continue
-			
-			var aabb: AABB = node.global_transform * node.get_aabb()
-			var tris: PackedVector3Array = []
-			
-			var verts: PackedVector3Array = mesh.get_faces()
-			for vert: Vector3 in verts:
-				tris.append(node.global_transform * vert)
+## Returns mesh instance data containing the node instance, global aabb, and global tris. Return format: { node, aabb, tris }
+func get_mesh_instance_data(node: MeshInstance3D) -> Dictionary:
+	var mesh: Mesh = node.mesh
+	var aabb: AABB = node.global_transform * node.get_aabb()
+	
+	if !mesh: return { "node": node, "aabb": aabb, "tris": [] }
 
-			visual_instances_data.append({ "node": node, "aabb": aabb, "tris": tris })
+	var tris: PackedVector3Array = []
+	
+	var verts: PackedVector3Array = mesh.get_faces()
+	for vert: Vector3 in verts:
+		tris.append(node.global_transform * vert)
 
-		elif node is CSGShape3D:
-			var meshes: Array = node.get_meshes()
-			if meshes.is_empty(): continue
+	return { "node": node, "aabb": aabb, "tris": tris }
 
-			var aabb: AABB = node.global_transform * node.get_aabb()
-			var tris: PackedVector3Array = []
+## Returns CSG data containing the node instance, global aabb, and global tris. Return format: { node, aabb, tris }
+func get_csg_data(node: CSGShape3D) -> Dictionary:
+	var meshes: Array = node.get_meshes()
+	var aabb: AABB = node.global_transform * node.get_aabb()
 
-			var verts: PackedVector3Array = (meshes[1] as ArrayMesh).get_faces()
-			for vert: Vector3 in verts:
-				tris.append(node.global_transform * vert)
+	if meshes.is_empty(): return { "node": node, "aabb": aabb, "tris": [] }
 
-			visual_instances_data.append({ "node": node, "aabb": aabb, "tris": tris })
+	var tris: PackedVector3Array = []
 
-## Transform local triangle to global triangle.
-func _local_tri_to_global_tri(trf: Transform3D, tri: Vector3) -> Vector3:
-	return trf * tri
+	var verts: PackedVector3Array = (meshes[1] as ArrayMesh).get_faces()
+	for vert: Vector3 in verts:
+		tris.append(node.global_transform * vert)
+
+	return { "node": node, "aabb": aabb, "tris": tris }
 
 ## Returns all the children of [node] recursively. Limit to specific types using [types]. 
 func get_all_children(out: Array[Node], node: Node, exclude: Node = null, types: Array[Variant] = []) -> void:

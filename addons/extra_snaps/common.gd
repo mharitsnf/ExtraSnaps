@@ -25,3 +25,5 @@ const SETTINGS_FILE_PATH = "user://extra_snaps.cfg"
 const INT32_MAX = 4294967295
 # https://docs.godotengine.org/en/stable/classes/class_float.html#
 const FLOAT64_MAX = 1.79769e308
+
+const SCENARIO_RAY_DISTANCE = 5000.
