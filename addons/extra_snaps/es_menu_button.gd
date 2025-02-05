@@ -44,23 +44,28 @@ func _enter_tree() -> void:
 	pm.add_item("Configure Collision Mask", common.RootItems.CONFIGURE_MASK)
 	pm.id_pressed.connect(_on_main_pm_id_pressed)
 
+
 func _exit_tree() -> void:
 	if dialog_configure_mask:
 		dialog_configure_mask.queue_free()
 
+
 func set_initial_values(surface_type: int, snap_type: int) -> void:
 	init_surface_type = surface_type
 	init_snap_type = snap_type
+
 
 func _on_surface_type_pm_id_pressed(id: int) -> void:
 	new_surface_type_selected.emit(id)
 	for i: int in common.SurfaceTypes.values():
 		surface_type_pm.set_item_checked(i, i == id)
 
+
 func _on_snap_type_pm_id_pressed(id: int) -> void:
 	new_snap_type_selected.emit(id)
 	for i: int in common.SnapTypes.values():
 		snap_type_pm.set_item_checked(i, i == id)
+
 
 func _on_main_pm_id_pressed(id: int) -> void:
 	match id:
@@ -72,12 +77,14 @@ func _on_main_pm_id_pressed(id: int) -> void:
 			dialog_configure_mask.hide()
 			configure_mask_window_instantiated.emit(dialog_configure_mask)
 		
+
 func _on_mask_config_confirm(mask: int) -> void:
 	collision_mask_changed.emit(mask)
 	dialog_configure_mask.queue_free()
 	if mask == collision_mask:
 		return
 	collision_mask = mask
+
 
 func _on_close_config() -> void:
 	dialog_configure_mask.queue_free()
