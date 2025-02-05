@@ -41,6 +41,7 @@ func _enter_tree() -> void:
 	tool_button = common.ES_MENU_BUTTON_PSCN.instantiate()
 	if has_config:
 		tool_button.set_initial_values(current_surface_type, current_snap_type)
+	
 	tool_button.collision_mask = collision_mask
 	tool_button.new_surface_type_selected.connect(_on_new_surface_type_selected)
 	tool_button.new_snap_type_selected.connect(_on_new_snap_type_selected)
@@ -55,6 +56,7 @@ func _enter_tree() -> void:
 	ev.ctrl_pressed = true
 	ev.command_or_control_autoremap = true
 	InputMap.action_add_event("extra_snaps_move", ev)
+
 
 func _exit_tree() -> void:
 	remove_control_from_container(CONTAINER_SPATIAL_EDITOR_MENU, tool_button)
@@ -109,34 +111,45 @@ func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent) -> int:
 
 # region ES Menu Button Signal Listener
 
+## Creates a popup window for collision mask selection
 func _on_configure_mask_window_instantiated(window: Window) -> void:
 	var editor_interface = get_editor_interface()
 	var base_control = editor_interface.get_base_control()
 	base_control.add_child(window)
 	window.popup_centered()
 
+
+## Listens for surface type changes
 func _on_new_surface_type_selected(id: common.SurfaceTypes) -> void:
 	current_surface_type = id
-	save_config()
+	_save_config()
 
+
+## Listens for snap type changes
 func _on_new_snap_type_selected(id: common.SnapTypes) -> void:
 	current_snap_type = id
-	save_config()
+	_save_config()
 
+
+## Listens for collision mask changes
 func _on_collision_mask_changed(mask: int) -> void:
 	if mask == collision_mask:
 		return
+	
 	var old_mask = collision_mask
 	collision_mask = mask
 	undoredo_action.create_action("ExtraSnaps: Collision Mask Changed")
 	undoredo_action.add_do_property(self, "collision_mask", mask)
 	undoredo_action.add_undo_property(self, "collision_mask", old_mask)
-	undoredo_action.add_do_method(self, "save_config")
-	undoredo_action.add_undo_method(self, "save_config")
+	undoredo_action.add_do_method(self, "_save_config")
+	undoredo_action.add_undo_method(self, "_save_config")
 	undoredo_action.commit_action()
-	save_config()
+	
+	_save_config()
 
-func save_config():
+
+## Save changes to configuration file
+func _save_config():
 	if has_config:
 		new_config.set_value("collision_mask", "collision_mask", collision_mask)
 		new_config.set_value("surface_type", "surface_type", current_surface_type)
@@ -177,6 +190,7 @@ func _move_selection(viewport_camera: Camera3D, event: InputEventMouseMotion) ->
 
 	return AFTER_GUI_INPUT_STOP
 
+
 func _mesh_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> void:
 	# Preprocess / setup
 	var viewport: SubViewport = viewport_camera.get_viewport()
@@ -200,7 +214,7 @@ func _mesh_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> 
 
 	# Get intersecting meshes, convert them from IDs to nodes
 	var object_ids: PackedInt64Array = RenderingServer.instances_cull_ray(from, to * common.SCENARIO_RAY_DISTANCE, scenario)
-	var intersected_nodes: Array = Array(object_ids).map(func (id: int) -> Object: return instance_from_id(id))
+	var intersected_nodes: Array = Array(object_ids).map(func(id: int) -> Object: return instance_from_id(id))
 
 	# Loop through the intersecting meshes, add them to a global variable (object_tris_cache) if they're not in it already
 	for node: Object in intersected_nodes:
@@ -208,7 +222,7 @@ func _mesh_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> 
 		if selected_nodes.has(node): continue
 		
 		# Do not process the mesh instance again if it has already been processed
-		var node_data: Array[Dictionary] = object_tris_cache.filter(func (data: Dictionary) -> bool: return data.node == node)
+		var node_data: Array[Dictionary] = object_tris_cache.filter(func(data: Dictionary) -> bool: return data.node == node)
 		if !node_data.is_empty(): continue
 
 		# Otherwise, create the cache
@@ -217,7 +231,7 @@ func _mesh_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> 
 		elif node is CSGShape3D: object_tris_cache.append(get_csg_data(node))
 
 	# Get the intersecting meshes cache
-	var intersected_nodes_data = object_tris_cache.filter(func (data: Dictionary) -> bool: return intersected_nodes.has(data.node))
+	var intersected_nodes_data = object_tris_cache.filter(func(data: Dictionary) -> bool: return intersected_nodes.has(data.node))
 
 	# Find the closest point
 	for data: Dictionary in intersected_nodes_data:
@@ -247,6 +261,7 @@ func _mesh_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> 
 			var g_quat: Quaternion = get_quaternion_from_normal(selected.global_basis, min_n)
 			selected.global_basis = Basis(g_quat)
 
+
 func _collision_objects_snapping(viewport_camera: Camera3D, event: InputEventMouseMotion) -> void:
 	# Preprocess
 	var viewport: SubViewport = viewport_camera.get_viewport()
@@ -269,7 +284,7 @@ func _collision_objects_snapping(viewport_camera: Camera3D, event: InputEventMou
 	
 	# Exclude CollisionObject children of the selected node
 	for child: Node in selected_nodes:
-		if child is CollisionObject3D: 
+		if child is CollisionObject3D:
 			exclude_list.append((child as CollisionObject3D).get_rid())
 	
 	ray_query.exclude = exclude_list
@@ -298,7 +313,7 @@ func get_mesh_instance_data(node: MeshInstance3D) -> Dictionary:
 	var mesh: Mesh = node.mesh
 	var aabb: AABB = node.global_transform * node.get_aabb()
 	
-	if !mesh: return { "node": node, "aabb": aabb, "tris": [] }
+	if !mesh: return {"node": node, "aabb": aabb, "tris": []}
 
 	var tris: PackedVector3Array = []
 	
@@ -306,14 +321,14 @@ func get_mesh_instance_data(node: MeshInstance3D) -> Dictionary:
 	for vert: Vector3 in verts:
 		tris.append(node.global_transform * vert)
 
-	return { "node": node, "aabb": aabb, "tris": tris }
+	return {"node": node, "aabb": aabb, "tris": tris}
 
 ## Returns CSG data containing the node instance, global aabb, and global tris. Return format: { node, aabb, tris }
 func get_csg_data(node: CSGShape3D) -> Dictionary:
 	var meshes: Array = node.get_meshes()
 	var aabb: AABB = node.global_transform * node.get_aabb()
 
-	if meshes.is_empty(): return { "node": node, "aabb": aabb, "tris": [] }
+	if meshes.is_empty(): return {"node": node, "aabb": aabb, "tris": []}
 
 	var tris: PackedVector3Array = []
 
@@ -321,7 +336,7 @@ func get_csg_data(node: CSGShape3D) -> Dictionary:
 	for vert: Vector3 in verts:
 		tris.append(node.global_transform * vert)
 
-	return { "node": node, "aabb": aabb, "tris": tris }
+	return {"node": node, "aabb": aabb, "tris": tris}
 
 ## Returns all the children of [node] recursively. Limit to specific types using [types]. 
 func get_all_children(out: Array[Node], node: Node, exclude: Node = null, types: Array[Variant] = []) -> void:
@@ -343,8 +358,8 @@ func get_all_children(out: Array[Node], node: Node, exclude: Node = null, types:
 func get_quaternion_from_normal(old_basis: Basis, new_normal: Vector3) -> Quaternion:
 	new_normal = new_normal.normalized()
 
-	var quat : Quaternion = Quaternion(old_basis.y, new_normal).normalized()
-	var new_right : Vector3 = quat * old_basis.x
-	var new_fwd : Vector3 = quat * old_basis.z
+	var quat: Quaternion = Quaternion(old_basis.y, new_normal).normalized()
+	var new_right: Vector3 = quat * old_basis.x
+	var new_fwd: Vector3 = quat * old_basis.z
 
 	return Basis(new_right, new_normal, new_fwd).get_rotation_quaternion()
